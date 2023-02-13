@@ -1,110 +1,107 @@
-# UC2-ESP Firmware for the openUC2 UC2e electronics
+# Matchboxscope ESP32 Software
 
-This repository provides the latest (`V2`) firmware that controls external hardware like Motors, LEDs, Lasers and other customized elements using an ESP32 and an adapter board. It is inspired by the [UC2-REST](https://github.com/openUC2/UC2-REST/tree/master/ESP32) firmware, but features a much more structured way of the code by dividing modules into seperated classes. A `ModuleController` ensures a proper initializiation of individual modules at runtime, which makes the entire code very modular and follows the overall UC2 principle. 
+## Setup
 
-Similar to the legacy UC2-REST Firmware, the microcontroller can communicate using the wired serial and the wireless WiFi protocol. Both rely on a more-less similar `REST API` that uses endpoints to address an `act, get, set` command. For example, the information about the state of the ESP can be retrieved by issuing the code: 
+### Prerequisites
 
-```
-{"task":"/state_get"}
-```
+This Arduino sketch is written for the [Ai-Thinker ESP32-CAM](http://www.ai-thinker.com/pro_view-24.html) board. Before you can upload the sketch to the board, you need to carry out the following instructions once:
 
-A list of all commands that can be sent via HTTP requests and serial commands (e.g. by using the Arduino IDE-contained Serial monitor at 115200 BAUD) can be found in the [RestApi.md](./RestApi.md)-file. 
+1. Install the Arduino IDE [here](https://arduino.cc/). This project is tested with v1.8.x of the Arduino IDE.
+2. In the Preferences dialog of the Arduino IDE, add the following URL to the "Additional Board Manager URLs" dialog: `https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json` (detailed instructions with screenshots [here](https://randomnerdtutorials.com/installing-the-esp32-board-in-arduino-ide-windows-instructions/))
+3. In the Boards Manager dialog of the Arduino IDE, install v2.0.x of the esp32 boards package.
+4. In the Libraries Manager dialog of the Arduino IDE, install v6.19.x of the [ArduinoJson](https://github.com/bblanchon/ArduinoJson) package (by Benoit Blanchon) and v2.0.x of the [WifiManager](https://github.com/tzapu/WiFiManager) package (by tzapu).
+5. Download the latest Matchboxscope release from the [Matchboxscope releases page](https://github.com/beniroquai/Matchboxscope/releases) and unzip the archive.
+6. Add v1.6 of the [ESP32Ping](https://github.com/marian-craciunescu/ESP32Ping) package to your Arduino libraries. You will need to do this manually, as it is not listed in the Arduino IDE's Library Manager. You can do this by copying the `libraries/ESP32Ping` subdirectory into your Arduino workspace's `libraries` directory.
 
-# Setting up the build environment
+### Software Upload
 
-In order to build the code, you have to follow the following steps:
+The Matchboxscope software consists of two components: firmware, which performs all hardware control and serves a web interface; and static web assets, which are used for the web interface provided by the firmware.
 
-1. Install Visual Studio Code + the Extension called "Platform.io" => Restart Visual studio code to load PIO
-2. Clone this repository including all the submodules: `git clone --recurse-submodules https://github.com/youseetoo/uc2-esp32`
-3. Open the main folder in the Visual Studio Code 
-4. Adjust the settings in the file `platformio.ini`-file (mostly the port)
-5. Hit the `PlatformIO upload` button
-6. open the PlatformIO serial monitor and check the ESP32's output
-7. In case you have any problems: File an issue :-) 
+#### Firmware Configuration
 
-# Flash the firmware using the Web-Tool
+You will upload the firmware to the ESP32-CAM board from the Arduino IDE, which you should use to open the `main.ino` file in this directory. However, before you upload the firmware to the ESP32-CAM board you will need to change some settings to match your needs.
 
-A new way to flash the firmware to the ESP32 is to use the open-source ESPHome Webtool. We have modified it such that the software in thi repo is compiled and uploaded to the website: 
+Anglerfish settings:
 
-**[www.youseetoo.github.io]**(youseetoo.github.io)
+- `timelapseIntervalAnglerfish`: **this is an undocumented setting.**
+- `focuStackStepsizeAnglerfish`: **this is an undocumented setting.**
+- `isTimelapseAnglerfish`: **this is an undocumented setting.**
+- `isAcquireStack`: **this is an undocumented setting.**
+- `myFile`: **this is not a setting and does not belong in this section.**
 
-There you can select the board you have and flash the code. If the driver is properly installed, you simply select the port and hit `start`. The firmware will automatically be downloaded and flashed through the browser. 
+Wifi modes: there are three "modes" in which you can configure wifi connectivity for the firmware:
 
-<p align="center">
-<img src="./IMAGES/webtool.png" width="550">
-<br> This shows the gui to first select the board you have before the browser (chrome/edge) automatically flashes the firmware.
-</p>
+- Normal mode: the ESP32-CAM board will attempt to connect directly to a wifi network upon startup.
+- Access Point mode: the ESP32-CAM board will bring up its own local wifi network as an access point; then you should use your computer (or other wifi-enabled device) to connect to that wifi network, after which you can use your web browser to open `192.168.4.1` to operate the Matchboxscope.
+- Captive Portal mode: the ESP32-CAM board will first bring up its own local wifi network as an access point which serves a web interface for configuring wifi settings to connect to the internet from another wifi network; then you should use your computer (or other wifi-enabled device) to connect to that wifi network, after which you can use your web browser to open `192.168.4.1` to configure the Matchboxscope for internet connectivity.
 
-# Additional information
+Wifi settings:
 
-This is a fastly moving repo and the information may get outdated quickly. Please also check the relevant information in our [documentation](https://openuc2.github.io/docs/Electronics/uc2e1)
+- `hostWifiAP`: set to `true` to use the Matchboxscope in "Access Point" or "Captive Portal" mode.
+- `isCaptivePortal`: set to `true` to use the Matchboxscope in "Captive Portal" mode.
+- `mSSID`: set to the SSID of the wifi network to connect to in "Normal" mode.
+- `mPASSWORD`: set to the password of the wifi network to connect to in "Normal" mode.
+- `hostname`: **this is an undocumented setting.**
+- `WifiManager`: **this is not a setting and does not belong in this section.**
+- `previousCheckWifi`: **this is not a setting and does not belong in this section.**
+- `delayReconnect`: **this is not a setting and does not belong in this section.**
+- `isInternetAvailable`: **this is not a setting and does not belong in this section.**
+- `isStreaming`: **this is not a setting and does not belong in this section.**
+- `isStreamingStopped`: **this is not a setting and does not belong in this section.**
 
+Google Drive upload settings:
 
-# Information about the REST commands 
+- `myDomain`: **this is an undocumented setting.**
+- `myScript`: **this is an undocumented setting.**
+- `myFilename`: **this is an undocumented setting.**
+- `mimeType`: **this is an undocumented setting.**
+- `myImage`: **this is an undocumented setting.**
+- `waitingTime`: **this is an undocumented setting.**
 
-Every component can be used by calling it in a REST-ful way. A not-complete document that describes the most important functions can be found [here](./RestApi.md)
+#### Firmware Upload
 
-The general structure for the serial would become: 
+To upload the firmware, set the board type to ESP32 Arduino > ESP32 Dev Module and use a USB cable to connect your ESP32-CAM board to your computer. The following settings should work:
 
-````
-{"task": "/state_get"}
-````
+- Upload speed: 921600
+- CPU Frequency: 240 MHz (WiFi/BT)
+- Flash Frequency: 80MHz
+- Flash Mode: QIO
+- Flash Size: 4MB (32Mb) (**this is not a default setting**)
+- Partition Scheme: Default 4MB with spiffs (1.2MB APP/1.5MB SPIFFS)
+- Core Debug Level: None
+- PSRAM: Enabled (**this is not a default setting**)
+- Arduino Runs On: Core 1
+- Events Run On: Core 1
 
-to get the information about the MCU. A additional cheat-sheet can be found [here](main/json_api_BD.txt)
+You will need to set the USB port of the board based on your computer's settings. Then you should be able to compile and upload the firmware.
 
-# Implement your own module
+You only need to upload the firmware once to the ESP32-CAM if you are using the Matchboxscope software in Matchboxscope mode. If you are using it in Anglerfish mode, you will need to upload the firmware once before deploying it, for each time you deploy it; this is needed due to the way the Anglerfish mode uses the ESP32 board's deep sleep functionality.A
 
-The object oriented structure of the Firmware allows one to (more-less) easily implement additional components/modules. A rough structure where to add the different components like endpoints, REST-hooks, etc. is summarized [here](DOC_Firmware.md).
+#### Static Web Asset Upload
 
-# Some Arduino-CLI/ESPTOOL/PlatformIO-related commands 
+The Matchboxscope firmware serves a web interface which depends on some HTML, CSS, and Javascript files as static web assets. Those files will need to be uploaded once to the ESP32's PSRAM as an SFPIFFS image, independently of the firmware. You should do this using the Tools > ESP32 Data Sketch Upload menu item. You only need to re-upload these static web assets when you modify them.
 
-This is a random collection of tasks/commands that are useful to compile/upload the code by hand.
+## Usage
 
+## Wifi Configuration with the Captive Portal
 
-Convert the firmware into a single file:
+Instructions for how to use the captive portal to make the Matchboxscope software connect to a wifi network are not provided at this time.
 
-```
-cd uc2-ESP/.pio/build/esp32dev
-python -m esptool --chip esp32 merge_bin  -o merged-firmware.bin  --flash_mode dio  --flash_freq 40m  --flash_size 4MB  0x1000 bootloader.bin  0x8000 partitions.bin  0xe000 boot_app0.bin  0x10000 firmware.bin
-```
+## Matchboxscope Mode
 
-Install the ESP32 core 
+Instructions for how to operate the Matchboxscope software in Matchboxscope mode are not provided at this time.
 
-```
-arduino-cli core update-index --config-file arduino-cli.yaml
-arduino-cli core install esp32:esp32
-arduino-cli board list
-```
+### Anglerfish Mode
 
-Compile the firmware in a dedicated output folder
+Detailed instructions for how to operate the Matchboxscope software in Anglerfish mode are not provided at this time. General instructions for overall use of the hardware and software together are in the README.md file at the root of this repository.
 
-```
-mkdir build
-arduino-cli compile --fqbn esp32:esp32:esp32:PSRAM=disabled,PartitionScheme=huge_app,CPUFreq=80 ESP32/main/main.ino  --output-dir ./build/ --libraries ./libraries/
-```
+## Troubleshooting
 
-Flash the firmware to the ESP32 board 
- 
-```
-esptool.py --chip esp32 --port /dev/cu.SLAB_USBtoUART --baud 921600 --before default_reset --after hard_reset write_flash -z --flash_mode dio --flash_freq 80m --flash_size 4MB 0x1000 /build/main.ino.bootloader.bin 0x8000 /build/main.ino.partitions.bin 0xe000 /build/boot_app0.bin 0x10000 /build/main.ino.bin 
-```
+If you're on an Android phone configured to simultaneously use WiFi and mobile data to connect to the internet (which may be listed as "Wifi+" mode), it may be unable to access the Matchboxscope in Access Point mode at address 192.168.4.1; in that case, you should disable Wifi+ mode.
 
-Upload the firmware using the Arduino-CLI
+## License
 
-```
-arduino-cli upload -p /dev/cu.usbserial-1310 --fqbn esp32:esp32:esp32-poe-iso .
-```
+All software in this directory, including the `main` subdirectory, is licensed under the MIT License, except where otherwise noted. Dependencies provided together with this software, under the `libraries` subdirectory, are distributed under their own respective licenses - refer to their README and LICENSE files for details.
 
-
-Screen the serial monitor
-
-```
-screen /dev/cu.usbserial-1310 115200
-```
-
-Upload via esptool:
-
-```
-pip install esptool
-python -m esptool --chip esp32 --port /dev/cu.SLAB_USBtoUART --baud 921600  write_flash --flash_mode dio --flash_size detect 0x0 main.ino.bin
-```
+## Collaboration
+If you find this project useful, please like this repository, follow us on Twitter and cite the webpage! :-)

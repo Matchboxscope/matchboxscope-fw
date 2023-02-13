@@ -1,287 +1,197 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>ESP32 OV2460</title>
+        <style>          body{font-family:Arial,Helvetica,sans-serif;background:#181818;color:#EFEFEF;font-size:16px}h2{font-size:18px}section.main{display:flex}#menu,section.main{flex-direction:column}#menu{display:none;flex-wrap:nowrap;min-width:340px;background:#363636;padding:8px;border-radius:4px;margin-top:-10px;margin-right:10px}#content{display:flex;flex-wrap:wrap;align-items:stretch}figure{padding:0;margin:0;-webkit-margin-before:0;margin-block-start:0;-webkit-margin-after:0;margin-block-end:0;-webkit-margin-start:0;margin-inline-start:0;-webkit-margin-end:0;margin-inline-end:0}figure img{display:block;width:100%;height:auto;border-radius:4px;margin-top:8px}@media (min-width: 800px) and (orientation:landscape){#content{display:flex;flex-wrap:nowrap;align-items:stretch}figure img{display:block;max-width:100%;max-height:calc(100vh - 40px);width:auto;height:auto}figure{padding:0;margin:0;-webkit-margin-before:0;margin-block-start:0;-webkit-margin-after:0;margin-block-end:0;-webkit-margin-start:0;margin-inline-start:0;-webkit-margin-end:0;margin-inline-end:0}}section#buttons{display:flex;flex-wrap:nowrap;justify-content:space-between}#nav-toggle{cursor:pointer;display:block}#nav-toggle-cb{outline:0;opacity:0;width:0;height:0}#nav-toggle-cb:checked+#menu{display:flex}.input-group{display:flex;flex-wrap:nowrap;line-height:22px;margin:5px 0}.input-group>label{display:inline-block;padding-right:10px;min-width:47%}.input-group input,.input-group select{flex-grow:1}.range-max,.range-min{display:inline-block;padding:0 5px}button{display:block;margin:5px;padding:0 12px;border:0;line-height:28px;cursor:pointer;color:#fff;background:#ff3034;border-radius:5px;font-size:16px;outline:0}button:hover{background:#ff494d}button:active{background:#f21c21}button.disabled{cursor:default;background:#a0a0a0}input[type=range]{-webkit-appearance:none;width:100%;height:22px;background:#363636;cursor:pointer;margin:0}input[type=range]:focus{outline:0}input[type=range]::-webkit-slider-runnable-track{width:100%;height:2px;cursor:pointer;background:#EFEFEF;border-radius:0;border:0 solid #EFEFEF}input[type=range]::-webkit-slider-thumb{border:1px solid rgba(0,0,30,0);height:22px;width:22px;border-radius:50px;background:#ff3034;cursor:pointer;-webkit-appearance:none;margin-top:-11.5px}input[type=range]:focus::-webkit-slider-runnable-track{background:#EFEFEF}input[type=range]::-moz-range-track{width:100%;height:2px;cursor:pointer;background:#EFEFEF;border-radius:0;border:0 solid #EFEFEF}input[type=range]::-moz-range-thumb{border:1px solid rgba(0,0,30,0);height:22px;width:22px;border-radius:50px;background:#ff3034;cursor:pointer}input[type=range]::-ms-track{width:100%;height:2px;cursor:pointer;background:0 0;border-color:transparent;color:transparent}input[type=range]::-ms-fill-lower{background:#EFEFEF;border:0 solid #EFEFEF;border-radius:0}input[type=range]::-ms-fill-upper{background:#EFEFEF;border:0 solid #EFEFEF;border-radius:0}input[type=range]::-ms-thumb{border:1px solid rgba(0,0,30,0);height:22px;width:22px;border-radius:50px;background:#ff3034;cursor:pointer;height:2px}input[type=range]:focus::-ms-fill-lower{background:#EFEFEF}input[type=range]:focus::-ms-fill-upper{background:#363636}.switch{display:block;position:relative;line-height:22px;font-size:16px;height:22px}.switch input{outline:0;opacity:0;width:0;height:0}.slider{width:50px;height:22px;border-radius:22px;cursor:pointer;background-color:grey}.slider,.slider:before{display:inline-block;transition:.4s}.slider:before{position:relative;content:"";border-radius:50%;height:16px;width:16px;left:4px;top:3px;background-color:#fff}input:checked+.slider{background-color:#ff3034}input:checked+.slider:before{-webkit-transform:translateX(26px);transform:translateX(26px)}select{border:1px solid #363636;font-size:14px;height:22px;outline:0;border-radius:5px}.image-container{position:relative;min-width:160px}.close{position:absolute;right:5px;top:5px;background:#ff3034;width:16px;height:16px;border-radius:100px;color:#fff;text-align:center;line-height:18px;cursor:pointer}.hidden{display:none}
+        </style>
+        <script src="https://lib.imjoy.io/imjoy-loader.js"></script>
+    </head>
+    <body>
+    <figure>
+      <div id="stream-container" class="image-container hidden">
+        <div class="close" id="close-stream">×</div>
+        <img id="stream" src="">
+      </div>
+    </figure>
+        <section class="main">
+            <section id="buttons">
+                <table>
+                <tr><td align="center"><button id="get-still">Get Still</button></td><td><td>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td><td align="center"><button id="toggle-stream">Start Stream</button></td></tr>
+                <tr><td align="center"><button id="perform-stack">Stack</button></td><td><td>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td><td align="center"><button id="get-stack">Perform Stack</button></td></tr>
+                <tr><td></td><td align="center">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<td></td><td></td></tr>
+                <tr><td align="center">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td><td align="center">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<td></td><td align="center">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td></tr>
+                <tr><td></td><td align="center" colspan="2"></br></tr>
+                <tr><td></td><td align="center" colspan="2"></br></tr>
+                <tr><td></td><td align="center" colspan="2"></br></tr>
+                <tr><td>Flash</td><td align="center" colspan="2"><input type="range" id="flash" min="0" max="255" value="0" onchange="try{fetch(document.location.origin+'/control?var=flash&val='+this.value);}catch(e){}"><td></td></tr>
+                <tr><td>LENS</td><td align="center" colspan="2"><input type="range" id="lens" min="0" max="255" value="0" onchange="try{fetch(document.location.origin+'/control?var=lens&val='+this.value);}catch(e){}"><td></td></tr>
+                <tr><td>Resolution</td><td align="center" colspan="2"><input type="range" id="framesize" min="0" max="9" value="5" onchange="try{fetch(document.location.origin+'/control?var=framesize&val='+this.value);}catch(e){}"><td></td></tr>
+                <tr><td>Effect</td><td align="center" colspan="2"><input type="range" id="effect" min="0" max="5" value="2" onchange="try{fetch(document.location.origin+'/control?var=effect&val='+this.value);}catch(e){}"><td></td></tr>
+                <tr><td>Gain</td><td align="center" colspan="2"><input type="range" id="gain" min="0" max="30" value="0" onchange="try{fetch(document.location.origin+'/control?var=gain&val='+this.value);}catch(e){}"><td></td></tr>
+                <tr><td>Exposure Time</td><td align="center" colspan="2"><input type="range" id="exposuretime" min="0" max="1600" value="100" onchange="try{fetch(document.location.origin+'/control?var=exposuretime&val='+this.value);}catch(e){}"><td></td></tr>
+                <tr><td>Quality</td><td align="center" colspan="2"><input type="range" id="quality" min="10" max="63" value="10" onchange="try{fetch(document.location.origin+'/control?var=quality&val='+this.value);}catch(e){}"><td></td></tr>
+                <tr><td>Timelapse Interval (0..180s; 0 => off) </td><td align="center" colspan="2"><input type="range" id="timelapse" min="0" max="180" value="0" onchange="try{fetch(document.location.origin+'/control?var=timelapseinterval&val='+this.value);}catch(e){}"><td></td></tr>
+                <tr><td align="center"><a href="#" onclick="sendToImageJ()"> <img alt="ImJoy" src="https://ij.imjoy.io/assets/badge/open-in-imagej-js-badge.svg" alt="Send To ImJoy"></td></tr>
+                </table>
+            </section>
+        </section>
 
-<head>
-    <title>UC2</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="styles.css">
-</head>
+        <div id="window-container"></div>
+        <div id="menu-container"></div>
+        <script>
+            loadImJoyBasicApp({
+                process_url_query: true,
+                show_window_title: false,
+                show_progress_bar: true,
+                show_empty_window: true,
+                menu_style: { position: "absolute", right: 0, top: "2px" },
+                window_style: {width: '100%', height: '100%'},
+                main_container: null,
+                menu_container: "menu-container",
+                window_manager_container: "window-container",
+                imjoy_api: { } // override some imjoy API functions here
+            }).then(async app => {
+                // get the api object from the root plugin
+                const api = app.imjoy.api;
+                // if you want to let users to load new plugins, add a menu item
+                app.addMenuItem({
+                    label: "➕ Load Plugin",
+                    callback() {
+                    const uri = prompt(
+                        `Please type a ImJoy plugin URL`,
+                        "https://github.com/imjoy-team/imjoy-plugins/blob/master/repository/ImageAnnotator.imjoy.html"
+                    );
+                    if (uri) app.loadPlugin(uri);
+                    },
+                });
 
-<body>
-    <script src="jquery-3.6.1.min.js"></script>
-    <script src="script.js"></script>
+                window.sendToImageJ = async function(){
+                    const imageURL = document.location.origin
+                    const response = await fetch(`${imageURL}/capture.jpeg?_cb=${Date.now()}`);
+                    const bytes = await response.arrayBuffer();
+                    // if you want a windows displayed in a draggable rezisable grid layout
+                    let ij = await api.getWindow("ImageJ.JS")
+                    if(!ij){
+                        ij = await api.createWindow({
+                            src: "https://ij.imjoy.io",
+                            name: "ImageJ.JS",
+                            fullscreen: true,
+                            // window_id: "imagej-window", // if you want to display imagej in a specific window, place a div with this id in the html
+                        });
+                    }
+                    else{
+                        await ij.show();
+                    }
+                    // https://github.com/imjoy-team/imagej.js#viewimageimg_array-config
+                    await ij.viewImage(bytes, {name: 'image.jpeg'})
+                }
+            });
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                function b(B) {
+                    let C;
+                    switch (B.type) {
+                        case 'checkbox':
+                            C = B.checked ? 1 : 0;
+                            break;
+                        case 'range':
+                        case 'select-one':
+                            C = B.value;
+                            break;
+                        case 'button':
+                        case 'submit':
+                            C = '1';
+                            break;
+                        default:
+                            return;
+                    }
+                    const D = `${c}/control?var=${B.id}&val=${C}`;
+                    fetch(D).then(E => {
+                        console.log(`request to ${D} finished, status: ${E.status}`)
+                    })
+                }
+                var c = document.location.origin;
+                const e = B => {
+                        B.classList.add('hidden')
+                    },
+                    f = B => {
+                        B.classList.remove('hidden')
+                    },
+                    g = B => {
+                        B.classList.add('disabled'), B.disabled = !0
+                    },
+                    h = B => {
+                        B.classList.remove('disabled'), B.disabled = !1
+                    },
+                    i = (B, C, D) => {
+                        D = !(null != D) || D;
+                        let E;
+                        'checkbox' === B.type ? (E = B.checked, C = !!C, B.checked = C) : (E = B.value, B.value = C), D && E !== C ? b(B) : !D && ('aec' === B.id ? C ? e(v) : f(v) : 'agc' === B.id ? C ? (f(t), e(s)) : (e(t), f(s)) : 'awb_gain' === B.id ? C ? f(x) : e(x) : 'face_recognize' === B.id && (C ? h(n) : g(n)))
+                    };
+                document.querySelectorAll('.close').forEach(B => {
+                    B.onclick = () => {
+                        e(B.parentNode)
+                    }
+                }), fetch(`${c}/status`).then(function(B) {
+                    return B.json()
+                }).then(function(B) {
+                    document.querySelectorAll('.default-action').forEach(C => {
+                        i(C, B[C.id], !1)
+                    })
+                });
+                const j = document.getElementById('stream'),
+                    k = document.getElementById('stream-container'),
+                    l = document.getElementById('get-still'),
+                    m = document.getElementById('toggle-stream'),
+                    o = document.getElementById('close-stream'),
+                    p = () => {
+                        window.stop(), m.innerHTML = 'Start Stream'
+                    },
+                    q = () => {
+                        j.src = `${c+':81'}/stream.mjpeg`, f(k), m.innerHTML = 'Stop Stream'
+                    },
+                    r = document.getElementById('get-stack');
+                    l.onclick = () => {
+                    p()
+                    j.src = `${c}/capture.jpeg?_cb=${Date.now()}`
+                    downloadImage(c)
+                    f(k)
+                },
+                o.onclick = () => {
+                    p(), e(k)
+                },
+                m.onclick = () => { //toggle stream
+                    const B = 'Stop Stream' === m.innerHTML;
+                    B ? p() : q()
+                },
+                r.onclick = () => { // stack
+                    getStack()
+                }
+            });
 
-    <form>
-        <label for="url">URL:</label><br>
-        <input type="text" id="url" name="url"><br>
-    </form>
-    <button id="connectbutton" onclick="tryToConnect()">Connect</button>
+            async function downloadImage(c){
+                // Using fetch
+                const image = await fetch(`${c}/capture.jpeg?_cb=${Date.now()}`)
+                const imageBlog = await image.blob()
+                const imageURL = URL.createObjectURL(imageBlog)
 
-    <div class="tab" id="tab">
-        <button class="tablinks" onclick="openTab(event, 'Wifi')">Wifi</button>
-        <button class="tablinks" onclick="openTab(event, 'BT')">BT</button>
-        <button class="tablinks" onclick="openTab(event, 'Motor')">Motor</button>
-        <button class="tablinks" onclick="openTab(event, 'LED')">LED</button>
-        <button class="tablinks" onclick="openTab(event, 'Laser')">Laser</button>
-    </div>
+                const link = document.createElement('a')
+                link.href = imageURL
+                link.download = "micrograph_"+Date.now()+".jpg"
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+              };
 
-    <div id="Wifi" class="tabcontent">
-        <h3>Wifi</h3>
-        <button id="getssids" onclick="getSsids()">Get SSIDs</button>
-        <ul id="ssids">
-        </ul>
-        <form>
-            <label for="ssid">SSID:</label><br>
-            <input type="text" id="ssid" name="ssid"><br>
-            <label for="password">Password:</label><br>
-            <input type="text" id="password" name="password">
-            <input type="checkbox" id="ap" name="ap">
-            <label for="ap">Access Point</label>
-        </form>
-        <button id="connect" onclick="connectToWifi()">Connect</button>
-    </div>
-
-    <div id="BT" class="tabcontent">
-        <h3>BT</h3>
-        <button id="getbtdevices" onclick="getBtDevices()">Get BT Devices</button>
-        <button id="getpairedbtdevices" onclick="getPairedBtDevices()">Get Paired BT Devices</button>
-
-        <ul id="btdevices">
-        </ul>
-
-        <form>
-            <label for="mac">MAC:</label><br>
-            <input type="text" id="mac" name="mac"><br>
-            <input type="checkbox" id="psx" name="psx" checked>
-            <label for="psx">Use ps library</label>
-        </form>
-
-        <button id="connectbt" onclick="connectToBT()">Connect</button>
-        <button id="removebt" onclick="removePairedBtDevices()">Remove Paired BT Device</button>
-    </div>
-
-    <div id="Motor" class="tabcontent">
-        <h3>Motor</h3>
-        <button onclick="hideOrShow('motorpins')">Pins</button>
-        <div class="container" id="motorpins">
-            <form class="pin">
-                <label>Stepper X</label><br>
-                <label for="steppinx">Step Pin</label><br>
-                <input type="text" id="steppinx" name="steppinx"><br>
-                <input type="checkbox" id="steppinxinvert">
-                <label for="steppinxinvert">Inverted</label><br>
-
-                <label for="dirpinx">Dir Pin:</label><br>
-                <input type="text" id="dirpinx" name="dirpinx"><br>
-                <input type="checkbox" id="dirpinxinvert">
-                <label for="dirpinxinvert">Inverted</label><br>
-
-                <label for="powerpinx">Power Pin:</label><br>
-                <input type="text" id="powerpinx" name="powerpinx"><br>
-                <input type="checkbox" id="powerpinxinvert">
-                <label for="powerpinxinvert">Inverted</label><br>
-            </form>
-            <form class="pin">
-                <label>Stepper Y</label><br>
-                <label for="steppiny">Step Pin</label><br>
-                <input type="text" id="steppiny" name="steppiny"><br>
-                <input type="checkbox" id="steppinyinvert">
-                <label for="steppinyinvert">Inverted</label><br>
-
-                <label for="dirpiny">Dir Pin:</label><br>
-                <input type="text" id="dirpiny"><br>
-                <input type="checkbox" id="dirpinyinvert">
-                <label for="dirpinyinvert">Inverted</label><br>
-
-                <label for="powerpiny">Power Pin:</label><br>
-                <input type="text" id="powerpiny"><br>
-                <input type="checkbox" id="powerpinyinvert">
-                <label for="powerpinyinvert">Inverted</label><br>
-            </form>
-
-            <form class="pin">
-                <label>Stepper Z</label><br>
-                <label for="steppinz">Step Pin</label><br>
-                <input type="text" id="steppinz"><br>
-                <input type="checkbox" id="steppinzinvert">
-                <label for="steppinzinvert">Inverted</label><br>
-
-                <label for="dirpinz">Dir Pin:</label><br>
-                <input type="text" id="dirpinz"><br>
-                <input type="checkbox" id="dirpinzinvert">
-                <label for="dirpinzinvert">Inverted</label><br>
-
-                <label for="powerpinz">Power Pin:</label><br>
-                <input type="text" id="powerpinz"><br>
-                <input type="checkbox" id="powerpinzinvert">
-                <label for="powerpinzinvert">Inverted</label><br>
-            </form>
-            <form class="pin">
-                <label>Stepper A</label><br>
-                <label for="steppina">Step Pin</label><br>
-                <input type="text" id="steppina"><br>
-                <input type="checkbox" id="steppinainvert">
-                <label for="steppinainvert">Inverted</label><br>
-
-                <label for="dirpina">Dir Pin:</label><br>
-                <input type="text" id="dirpina"><br>
-                <input type="checkbox" id="dirpinainvert">
-                <label for="dirpinainvert">Inverted</label><br>
-
-                <label for="powerpina">Power Pin:</label><br>
-                <input type="text" id="powerpina"><br>
-                <input type="checkbox" id="powerpinainvert">
-                <label for="powerpinainvert">Inverted</label><br>
-            </form>
-            <div>
-                <button id="setmotorsettings" onclick="setMotorSettings()">Set Motor Settings</button>
-            </div>
-        </div>
-
-        <h3>Motor Drive Range</h3>
-        <button onclick="hideOrShow('motorrange')">Drive Range</button>
-        <div class="container" id="motorrange">
-            <label>X</label><br>
-            <button onclick="setMotorRangeCalibration(0, 1)">Min Range</button><button
-                onclick="setMotorRangeCalibration(1, 1)">Max Range</button><label id="posx_max">0</label><button
-                onclick="setMotorRangeCalibration(2, 1)">Reset</button><br>
-            <label>Y</label><br>
-            <button onclick="setMotorRangeCalibration(0, 2)">Min Range</button><button
-                onclick="setMotorRangeCalibration(1, 2)">Max Range</button><label id="posy_max">0</label><button
-                onclick="setMotorRangeCalibration(2, 2)">Reset</button><br>
-            <label>Z</label><br>
-            <button onclick="setMotorRangeCalibration(0, 3)">Min Range</button><button
-                onclick="setMotorRangeCalibration(1, 3)">Max Range</button><label id="posz_max">0</label><button
-                onclick="setMotorRangeCalibration(2, 3)">Reset</button><br>
-            <label>A</label><br>
-            <button onclick="setMotorRangeCalibration(0, 0)">Min Range</button><button
-                onclick="setMotorRangeCalibration(1, 0)">Max Range</button><label id="posa_max">0</label><button
-                onclick="setMotorRangeCalibration(2, 0)">Reset</button><br>
-        </div>
-        <div>
-            <h3>Motor Control</h3>
-            <form>
-                <label for="xRange">X </label><label id="posx">0</label><br>
-                <input step="1" type="range" min="0" max="34" value="17" class="slider" id="xRange"
-                    oninput="updateMotors()" onchange="updateMotors()"><br>
-            </form>
-            <form>
-                <label for="yRange">Y </label><label id="posy">0</label><br>
-                <input step="1" type="range" min="0" max="34" value="17" class="slider" id="yRange"
-                    oninput="updateMotors()" onchange="updateMotors()"><br>
-            </form>
-            <form>
-                <label for="zRange">Z </label><label id="posz">0</label><br>
-                <input step="1" type="range" min="0" max="34" value="17" class="slider" id="zRange"
-                    oninput="updateMotors()" onchange="updateMotors()"><br>
-            </form>
-            <form>
-                <label for="aRange">A </label><label id="posa">0</label><br>
-                <input step="1" type="range" min="0" max="34" value="17" class="slider" id="aRange"
-                    oninput="updateMotors()" onchange="updateMotors()"><br>
-            </form>
-        </div>
-    </div>
-
-    <div id="LED" class="tabcontent">
-        <h3>LED</h3>
-        <button onclick="hideOrShow('ledpins')">Pins</button>
-        <div class="container" id="ledpins">
-            <form>
-                <label for="ledcount">LED Count:</label><br>
-                <input type="text" id="ledcount"><br>
-                <label for="ledpin">PIN:</label><br>
-                <input type="text" id="ledpin">
-            </form>
-            <button id="setledsettings" onclick="setLedSettings()">Set Led Settings</button>
-        </div>
-        <form>
-            <input type="checkbox" id="enableled" onclick='enableLeds(this)'>
-            <label for="enableled">Enable Leds</label><br>
-
-            <label for="redRange">Red</label><br>
-            <input type="range" min="0" max="255" value="128" class="slider" id="redRange" oninput="updateLeds()"
-                onchange="updateLeds()"><br>
-
-            <label for="greenRange">Green</label><br>
-            <input type="range" min="0" max="255" value="128" class="slider" id="greenRange" oninput="updateLeds()"
-                onchange="updateLeds()"><br>
-
-            <label for="blueRange">Blue</label><br>
-            <input type="range" min="0" max="255" value="128" class="slider" id="blueRange" oninput="updateLeds()"
-                onchange="updateLeds()"><br>
-        </form>
-
-    </div>
-
-    <div id="Laser" class="tabcontent">
-        <h3>Laser Setup</h3>
-        <label for="laser1pin">Laser1 Pin:</label>
-        <input type="text" id="laser1pin">
-        <button id="setlaser1pin" onclick="setLaserPin('1')">Set Laser1 Pin</button><br>
-        <label for="laser2pin">Laser2 Pin:</label>
-        <input type="text" id="laser2pin">
-        <button id="setlaser2pin" onclick="setLaserPin('2')">Set Laser2 Pin</button><br>
-        <label for="laser3pin">Laser3 Pin:</label>
-        <input type="text" id="laser3pin">
-        <button id="setlaser3pin" onclick="setLaserPin('3')">Set Laser3 Pin</button><br>
-
-        <h3>Laser Control</h3>
-        <label for="laser1value">Laser1:</label>
-        <label for="laser1value">Value:</label>
-        <input type="text" id="laser1value">
-        <label for="laser1despeckel">Despeckel:</label>
-        <input type="text" id="laser1despeckel">
-        <label for="laser1periode">Periode:</label>
-        <input type="text" id="laser1periode">
-        <button id="apply1" onclick="setLaserAct('1')">Apply</button><br>
-
-        <label for="laser2value">Laser2:</label>
-        <label for="laser2value">Value:</label>
-        <input type="text" id="laser2value">
-        <label for="laser2despeckel">Despeckel:</label>
-        <input type="text" id="laser2despeckel">
-        <label for="laser2periode">Periode:</label>
-        <input type="text" id="laser2periode">
-        <button id="apply2" onclick="setLaserAct('2')">Apply</button><br>
-
-        <label for="laser3value">Laser3:</label>
-        <label for="laser3value">Value:</label>
-        <input type="text" id="laser3value">
-        <label for="laser3despeckel">Despeckel:</label>
-        <input type="text" id="laser3despeckel">
-        <label for="laser3periode">Periode:</label>
-        <input type="text" id="laser3periode">
-        <button id="apply2" onclick="setLaserAct('3')">Apply</button><br>
-    </div>
-
-    <div id="Modules" class="tabcontent">
-        <h3>Modules</h3>
-        <input type="checkbox" id="m_enable_analog">
-        <label for="m_enable_analog">Enable AnalogIn</label><br>
-        <input type="checkbox" id="m_enable_dac">
-        <label for="m_enable_dac">Enable Dac</label><br>
-        <input type="checkbox" id="m_enable_digitalout">
-        <label for="m_enable_digitalout">Enable DigitalOut</label><br>
-        <input type="checkbox" id="m_enable_led">
-        <label for="m_enable_led">Enable Led</label><br>
-        <input type="checkbox" id="m_enable_motor">
-        <label for="m_enable_motor">Enable Motor</label><br>
-        <input type="checkbox" id="m_enable_laser">
-        <label for="m_enable_laser">Enable Laser</label><br>
-        <input type="checkbox" id="m_enable_pid">
-        <label for="m_enable_pid">Enable Pid</label><br>
-        <input type="checkbox" id="m_enable_scanner">
-        <label for="m_enable_scanner">Enable Scanner</label><br>
-        <input type="checkbox" id="m_enable_sensor">
-        <label for="m_enable_sensor">Enable Sensor</label><br>
-        <input type="checkbox" id="m_enable_slm">
-        <label for="m_enable_slm">Enable Slm</label><br>
-        <input type="checkbox" id="m_enable_analogjoystick">
-        <label for="m_enable_analogjoystick">Enable Analog Joystick</label><br>
-        <button id="setmodules" onclick="setModuleSettings()">Set Module Settings</button>
-    </div>
-
-</body>
-
+            async function getStack(){
+                try{
+                  fetch(document.location.origin+'/getStack');
+                  }
+                catch(e){}
+              };
+        </script>
+    </body>
 </html>
