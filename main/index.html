@@ -85,9 +85,10 @@
                     <td style="height: 31px; width: 29.663%;"><span
                             style="font-family: arial, helvetica, sans-serif;">Flash</span></td>
                     <td align="center" style="height: 31px; width: 24.9576%;"><span <
-                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="flash" min="0" max="255" value="0"
-                                onchange="try{fetch(document.location.origin+'/control?var=flash&amp;val='+this.value);}catch(e){}" 
-                                oninput="document.getElementById('valFlash').innerHTML = this.value"/></span>
+                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="flash" min="0"
+                                max="255" value="0"
+                                onchange="try{fetch(document.location.origin+'/control?var=flash&amp;val='+this.value);}catch(e){}"
+                                oninput="document.getElementById('valFlash').innerHTML = this.value" /></span>
                         <label id="valFlash"></label>
                     </td>
                     <td style="height: 31px; width: 21.1088%;"></td>
@@ -98,10 +99,10 @@
                     <td align="center" style="height: 31px; width: 24.9576%;"><span
                             style="font-family: arial, helvetica, sans-serif;"><input type="range" id="lens" min="0"
                                 max="255" value="0"
-                                onchange="try{fetch(document.location.origin+'/control?var=lens&amp;val='+this.value);}catch(e){}"    
-                                oninput="document.getElementById('valLens').innerHTML = this.value"/></span>
-                                <label id="valLens"></label>
-                            </td>
+                                onchange="try{fetch(document.location.origin+'/control?var=lens&amp;val='+this.value);}catch(e){}"
+                                oninput="document.getElementById('valLens').innerHTML = this.value" /></span>
+                        <label id="valLens"></label>
+                    </td>
                     <td style="height: 31px; width: 21.1088%;"></td>
                 </tr>
                 <tr style="height: 31px;">
@@ -110,7 +111,9 @@
                     <td align="center" style="height: 31px; width: 24.9576%;"><span
                             style="font-family: arial, helvetica, sans-serif;"><input type="range" id="framesize"
                                 min="0" max="9" value="5"
-                                onchange="try{fetch(document.location.origin+'/control?var=framesize&amp;val='+this.value);}catch(e){}" /></span>
+                                onchange="try{fetch(document.location.origin+'/control?var=framesize&amp;val='+this.value);}catch(e){}"
+                                oninput="document.getElementById('valFramesize').innerHTML = this.value" /></span>
+                            <label id="valFramesize" val="0"></label>
                     </td>
                     <td style="height: 31px; width: 21.1088%;"></td>
                 </tr>
@@ -120,7 +123,9 @@
                     <td align="center" style="height: 31px; width: 24.9576%;"><span
                             style="font-family: arial, helvetica, sans-serif;"><input type="range" id="effect" min="0"
                                 max="5" value="2"
-                                onchange="try{fetch(document.location.origin+'/control?var=effect&amp;val='+this.value);}catch(e){}" /></span>
+                                onchange="try{fetch(document.location.origin+'/control?var=effect&amp;val='+this.value);}catch(e){}" 
+                                oninput="document.getElementById('valEffect').innerHTML = this.value" /></span>
+                            <label id="valEffect"></label>
                     </td>
                     <td style="height: 31px; width: 21.1088%;"></td>
                 </tr>
@@ -130,7 +135,9 @@
                     <td align="center" style="height: 31px; width: 24.9576%;"><span
                             style="font-family: arial, helvetica, sans-serif;"><input type="range" id="gain" min="0"
                                 max="30" value="0"
-                                onchange="try{fetch(document.location.origin+'/control?var=gain&amp;val='+this.value);}catch(e){}" /></span>
+                                onchange="try{fetch(document.location.origin+'/control?var=gain&amp;val='+this.value);}catch(e){}" 
+                                oninput="document.getElementById('valGain').innerHTML = this.value" /></span>
+                                <label id="valGain"></label>
                     </td>
                     <td style="height: 31px; width: 21.1088%;"></td>
                 </tr>
@@ -140,7 +147,9 @@
                     <td align="center" style="height: 31px; width: 24.9576%;"><span
                             style="font-family: arial, helvetica, sans-serif;"><input type="range" id="exposuretime"
                                 min="0" max="1600" value="100"
-                                onchange="try{fetch(document.location.origin+'/control?var=exposuretime&amp;val='+this.value);}catch(e){}" /></span>
+                                onchange="try{fetch(document.location.origin+'/control?var=exposuretime&amp;val='+this.value);}catch(e){}" 
+                                oninput="document.getElementById('valExposure').innerHTML = this.value" /></span>
+                                <label id="valExposure"></label>
                     </td>
                     <td style="height: 31px; width: 21.1088%;"></td>
                 </tr>
@@ -150,7 +159,9 @@
                     <td align="center" style="height: 31px; width: 24.9576%;"><span
                             style="font-family: arial, helvetica, sans-serif;"><input type="range" id="quality" min="10"
                                 max="63" value="10"
-                                onchange="try{fetch(document.location.origin+'/control?var=quality&amp;val='+this.value);}catch(e){}" /></span>
+                                onchange="try{fetch(document.location.origin+'/control?var=quality&amp;val='+this.value);}catch(e){}"
+                                oninput="document.getElementById('valQuality').innerHTML = this.value" /></span>
+                                <label id="valQuality"></label>
                     </td>
                     <td style="height: 31px; width: 21.1088%;"></td>
                 </tr>
@@ -161,7 +172,9 @@
                     <td align="center" style="height: 31px; width: 24.9576%;"><span
                             style="font-family: arial, helvetica, sans-serif;"><input type="range" id="timelapse"
                                 min="0" max="180" value="0"
-                                onchange="try{fetch(document.location.origin+'/control?var=timelapseinterval&amp;val='+this.value);}catch(e){}" /></span>
+                                onchange="try{fetch(document.location.origin+'/control?var=timelapseinterval&amp;val='+this.value);}catch(e){}" 
+                                oninput="document.getElementById('valPeriod').innerHTML = this.value" /></span>
+                                <label id="valPeriod"></label>
                     </td>
                     <td style="height: 31px; width: 21.1088%;"></td>
                 </tr>

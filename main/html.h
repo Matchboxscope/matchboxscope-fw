@@ -3,103 +3,212 @@
 static const char PROGMEM INDEX_HTML[] = R"rawliteral(
 <!DOCTYPE HTML>
 <html>
+<style>
+    .range-wrap {
+        position: relative;
+        margin: 0 auto 3rem;
+    }
+
+    .range {
+        width: 100%;
+    }
+
+    .bubble {
+        background: red;
+        color: white;
+        padding: 4px 12px;
+        position: absolute;
+        border-radius: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .bubble::after {
+        content: "";
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: red;
+        top: -1px;
+        left: 50%;
+    }
+
+    body {
+        margin: 2rem;
+    }
+</style>
 <h3>Anglerfish</h3>
 <span style="font-family: arial, helvetica, sans-serif;"><img id="stream" />
-<p>This is the GUI for the Anglerfish / Matchboxscope&nbsp;</p>
-<p>If you have questions for its use, please have a look in the <a href="https://github.com/beniroquai/Matchboxscope/" target="_blank" rel="noopener">Github repository</a></p>
-<p>If you wish to upload a new firmware (bin), please follow <a href="/" onclick="javascript:event.target.port=82">this link.</a> </p>
+    <p>This is the GUI for the Anglerfish / Matchboxscope&nbsp;</p>
+    <p>If you have questions for its use, please have a look in the <a
+            href="https://github.com/beniroquai/Matchboxscope/" target="_blank" rel="noopener">Github repository</a></p>
+    <p>If you wish to upload a new firmware (bin), please follow <a href="/"
+            onclick="javascript:event.target.port=82">this link.</a> </p>
+    <p>If you wish to start the deep-sleep timelapse imaging, make sure you really want to hit this link: <a
+            href="/enable">this link.</a> </p>
 </span>
 <p><span style="font-family: arial, helvetica, sans-serif;">
-<script src="https://lib.imjoy.io/imjoy-loader.js"></script>
-</span></p>
+        <script src="https://lib.imjoy.io/imjoy-loader.js"></script>
+    </span></p>
 <figure>
-<div id="stream-container" class="image-container hidden">
-<div class="close" id="close-stream"><span style="font-family: arial, helvetica, sans-serif;">&times;</span></div>
-<span style="font-family: arial, helvetica, sans-serif;"><img id="stream" /></span></div>
+    <div id="stream-container" class="image-container hidden">
+        <div class="close" id="close-stream"><span style="font-family: arial, helvetica, sans-serif;">&times;</span>
+        </div>
+        <span style="font-family: arial, helvetica, sans-serif;"><img id="stream" /></span>
+    </div>
 </figure>
 <section class="main">
-<section id="buttons">
-<table style="height: 424px; width: 47.8344%;">
-<tbody>
-<tr style="height: 41px;">
-<td align="center" style="height: 41px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;"><button id="get-still">Get Still</button></span></td>
-<td style="height: 41px; width: 24.9576%;"></td>
-<td align="center" style="height: 41px; width: 21.1088%;"><span style="font-family: arial, helvetica, sans-serif;"><button id="toggle-stream">Start Stream</button></span></td>
-</tr>
-<tr style="height: 41px;">
-<td align="center" style="height: 41px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;"><button id="perform-stack">Stack</button></span></td>
-<td style="height: 41px; width: 24.9576%;"></td>
-<td align="center" style="height: 41px; width: 21.1088%;"><span style="font-family: arial, helvetica, sans-serif;"><button id="get-stack">Perform Stack</button></span></td>
-</tr>
-<tr style="height: 3px;">
-<td style="height: 3px; width: 29.663%;"></td>
-<td align="center" style="height: 3px; width: 24.9576%;"></td>
-<td style="width: 21.1088%; height: 3px;"></td>
-</tr>
-<tr style="height: 31px;">
-<td style="height: 31px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;">Flash</span></td>
-<td align="center" style="height: 31px; width: 24.9576%;"><span style="font-family: arial, helvetica, sans-serif;"><input type="range" id="flash" min="0" max="255" value="0" onchange="try{fetch(document.location.origin+'/control?var=flash&amp;val='+this.value);}catch(e){}" /></span></td>
-<td style="height: 31px; width: 21.1088%;"></td>
-</tr>
-<tr style="height: 31px;">
-<td style="height: 31px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;">Lens/Pump</span></td>
-<td align="center" style="height: 31px; width: 24.9576%;"><span style="font-family: arial, helvetica, sans-serif;"><input type="range" id="lens" min="0" max="255" value="0" onchange="try{fetch(document.location.origin+'/control?var=lens&amp;val='+this.value);}catch(e){}" /></span></td>
-<td style="height: 31px; width: 21.1088%;"></td>
-</tr>
-<tr style="height: 31px;">
-<td style="height: 31px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;">Resolution</span></td>
-<td align="center" style="height: 31px; width: 24.9576%;"><span style="font-family: arial, helvetica, sans-serif;"><input type="range" id="framesize" min="0" max="9" value="5" onchange="try{fetch(document.location.origin+'/control?var=framesize&amp;val='+this.value);}catch(e){}" /></span></td>
-<td style="height: 31px; width: 21.1088%;"></td>
-</tr>
-<tr style="height: 31px;">
-<td style="height: 31px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;">Effect</span></td>
-<td align="center" style="height: 31px; width: 24.9576%;"><span style="font-family: arial, helvetica, sans-serif;"><input type="range" id="effect" min="0" max="5" value="2" onchange="try{fetch(document.location.origin+'/control?var=effect&amp;val='+this.value);}catch(e){}" /></span></td>
-<td style="height: 31px; width: 21.1088%;"></td>
-</tr>
-<tr style="height: 31px;">
-<td style="height: 31px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;">Gain</span></td>
-<td align="center" style="height: 31px; width: 24.9576%;"><span style="font-family: arial, helvetica, sans-serif;"><input type="range" id="gain" min="0" max="30" value="0" onchange="try{fetch(document.location.origin+'/control?var=gain&amp;val='+this.value);}catch(e){}" /></span></td>
-<td style="height: 31px; width: 21.1088%;"></td>
-</tr>
-<tr style="height: 31px;">
-<td style="height: 31px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;">Exposure Time</span></td>
-<td align="center" style="height: 31px; width: 24.9576%;"><span style="font-family: arial, helvetica, sans-serif;"><input type="range" id="exposuretime" min="0" max="1600" value="100" onchange="try{fetch(document.location.origin+'/control?var=exposuretime&amp;val='+this.value);}catch(e){}" /></span></td>
-<td style="height: 31px; width: 21.1088%;"></td>
-</tr>
-<tr style="height: 31px;">
-<td style="height: 31px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;">Quality</span></td>
-<td align="center" style="height: 31px; width: 24.9576%;"><span style="font-family: arial, helvetica, sans-serif;"><input type="range" id="quality" min="10" max="63" value="10" onchange="try{fetch(document.location.origin+'/control?var=quality&amp;val='+this.value);}catch(e){}" /></span></td>
-<td style="height: 31px; width: 21.1088%;"></td>
-</tr>
-<tr style="height: 31px;">
-<td style="height: 31px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;">Timelapse Interval (0..180s; 0 =&gt; off)</span></td>
-<td align="center" style="height: 31px; width: 24.9576%;"><span style="font-family: arial, helvetica, sans-serif;"><input type="range" id="timelapse" min="0" max="180" value="0" onchange="try{fetch(document.location.origin+'/control?var=timelapseinterval&amp;val='+this.value);}catch(e){}" /></span></td>
-<td style="height: 31px; width: 21.1088%;"></td>
-</tr>
-<tr style="height: 27px;">
-<td align="center" style="height: 27px; width: 29.663%;"><span style="font-family: arial, helvetica, sans-serif;"><a href="#" onclick="sendToImageJ()"> <img alt="ImJoy" src="https://ij.imjoy.io/assets/badge/open-in-imagej-js-badge.svg" /></a></span></td>
-<td style="width: 24.9576%; height: 27px;"></td>
-<td style="width: 21.1088%; height: 27px;"></td>
-</tr>
-</tbody>
-</table>
-</section>
+    <section id="buttons">
+        <table style="height: 424px; width: 47.8344%;">
+            <tbody>
+                <tr style="height: 41px;">
+                    <td align="center" style="height: 41px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><button id="get-still">Get
+                                Still</button></span></td>
+                    <td style="height: 41px; width: 24.9576%;"></td>
+                    <td align="center" style="height: 41px; width: 21.1088%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><button id="toggle-stream">Start
+                                Stream</button></span></td>
+                </tr>
+                <tr style="height: 41px;">
+                    <td align="center" style="height: 41px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><button
+                                id="perform-stack">Stack</button></span></td>
+                    <td style="height: 41px; width: 24.9576%;"></td>
+                    <td align="center" style="height: 41px; width: 21.1088%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><button id="get-stack">Perform
+                                Stack</button></span></td>
+                </tr>
+                <tr style="height: 3px;">
+                    <td style="height: 3px; width: 29.663%;"></td>
+                    <td align="center" style="height: 3px; width: 24.9576%;"></td>
+                    <td style="width: 21.1088%; height: 3px;"></td>
+                </tr>
+                <tr style="height: 31px;">
+                    <td style="height: 31px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;">Flash</span></td>
+                    <td align="center" style="height: 31px; width: 24.9576%;"><span <
+                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="flash" min="0"
+                                max="255" value="0"
+                                onchange="try{fetch(document.location.origin+'/control?var=flash&amp;val='+this.value);}catch(e){}"
+                                oninput="document.getElementById('valFlash').innerHTML = this.value" /></span>
+                        <label id="valFlash"></label>
+                    </td>
+                    <td style="height: 31px; width: 21.1088%;"></td>
+                </tr>
+                <tr style="height: 31px;">
+                    <td style="height: 31px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;">Lens/Pump</span></td>
+                    <td align="center" style="height: 31px; width: 24.9576%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="lens" min="0"
+                                max="255" value="0"
+                                onchange="try{fetch(document.location.origin+'/control?var=lens&amp;val='+this.value);}catch(e){}"
+                                oninput="document.getElementById('valLens').innerHTML = this.value" /></span>
+                        <label id="valLens"></label>
+                    </td>
+                    <td style="height: 31px; width: 21.1088%;"></td>
+                </tr>
+                <tr style="height: 31px;">
+                    <td style="height: 31px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;">Resolution</span></td>
+                    <td align="center" style="height: 31px; width: 24.9576%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="framesize"
+                                min="0" max="9" value="5"
+                                onchange="try{fetch(document.location.origin+'/control?var=framesize&amp;val='+this.value);}catch(e){}"
+                                oninput="document.getElementById('valFramesize').innerHTML = this.value" /></span>
+                            <label id="valFramesize" val="0"></label>
+                    </td>
+                    <td style="height: 31px; width: 21.1088%;"></td>
+                </tr>
+                <tr style="height: 31px;">
+                    <td style="height: 31px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;">Effect</span></td>
+                    <td align="center" style="height: 31px; width: 24.9576%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="effect" min="0"
+                                max="5" value="2"
+                                onchange="try{fetch(document.location.origin+'/control?var=effect&amp;val='+this.value);}catch(e){}" 
+                                oninput="document.getElementById('valEffect').innerHTML = this.value" /></span>
+                            <label id="valEffect"></label>
+                    </td>
+                    <td style="height: 31px; width: 21.1088%;"></td>
+                </tr>
+                <tr style="height: 31px;">
+                    <td style="height: 31px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;">Gain</span></td>
+                    <td align="center" style="height: 31px; width: 24.9576%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="gain" min="0"
+                                max="30" value="0"
+                                onchange="try{fetch(document.location.origin+'/control?var=gain&amp;val='+this.value);}catch(e){}" 
+                                oninput="document.getElementById('valGain').innerHTML = this.value" /></span>
+                                <label id="valGain"></label>
+                    </td>
+                    <td style="height: 31px; width: 21.1088%;"></td>
+                </tr>
+                <tr style="height: 31px;">
+                    <td style="height: 31px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;">Exposure Time</span></td>
+                    <td align="center" style="height: 31px; width: 24.9576%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="exposuretime"
+                                min="0" max="1600" value="100"
+                                onchange="try{fetch(document.location.origin+'/control?var=exposuretime&amp;val='+this.value);}catch(e){}" 
+                                oninput="document.getElementById('valExposure').innerHTML = this.value" /></span>
+                                <label id="valExposure"></label>
+                    </td>
+                    <td style="height: 31px; width: 21.1088%;"></td>
+                </tr>
+                <tr style="height: 31px;">
+                    <td style="height: 31px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;">Quality</span></td>
+                    <td align="center" style="height: 31px; width: 24.9576%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="quality" min="10"
+                                max="63" value="10"
+                                onchange="try{fetch(document.location.origin+'/control?var=quality&amp;val='+this.value);}catch(e){}"
+                                oninput="document.getElementById('valQuality').innerHTML = this.value" /></span>
+                                <label id="valQuality"></label>
+                    </td>
+                    <td style="height: 31px; width: 21.1088%;"></td>
+                </tr>
+                <tr style="height: 31px;">
+                    <td style="height: 31px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;">Timelapse Interval (0..180s; 0 =&gt;
+                            off)</span></td>
+                    <td align="center" style="height: 31px; width: 24.9576%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><input type="range" id="timelapse"
+                                min="0" max="180" value="0"
+                                onchange="try{fetch(document.location.origin+'/control?var=timelapseinterval&amp;val='+this.value);}catch(e){}" 
+                                oninput="document.getElementById('valPeriod').innerHTML = this.value" /></span>
+                                <label id="valPeriod"></label>
+                    </td>
+                    <td style="height: 31px; width: 21.1088%;"></td>
+                </tr>
+                <tr style="height: 27px;">
+                    <td align="center" style="height: 27px; width: 29.663%;"><span
+                            style="font-family: arial, helvetica, sans-serif;"><a href="#" onclick="sendToImageJ()">
+                                <img alt="ImJoy"
+                                    src="https://ij.imjoy.io/assets/badge/open-in-imagej-js-badge.svg" /></a></span>
+                    </td>
+                    <td style="width: 24.9576%; height: 27px;"></td>
+                    <td style="width: 21.1088%; height: 27px;"></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
 </section>
 <div id="window-container"></div>
 <div id="menu-container"></div>
 <p><span style="font-family: arial, helvetica, sans-serif;">
-<script>
+        <script>
             loadImJoyBasicApp({
                 process_url_query: true,
                 show_window_title: false,
                 show_progress_bar: true,
                 show_empty_window: true,
                 menu_style: { position: "absolute", right: 0, top: "2px" },
-                window_style: {width: '100%', height: '100%'},
+                window_style: { width: '100%', height: '100%' },
                 main_container: null,
                 menu_container: "menu-container",
                 window_manager_container: "window-container",
-                imjoy_api: { } // override some imjoy API functions here
+                imjoy_api: {} // override some imjoy API functions here
             }).then(async app => {
                 // get the api object from the root plugin
                 const api = app.imjoy.api;
@@ -107,21 +216,21 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
                 app.addMenuItem({
                     label: "➕ Load Plugin",
                     callback() {
-                    const uri = prompt(
-                        `Please type a ImJoy plugin URL`,
-                        "https://github.com/imjoy-team/imjoy-plugins/blob/master/repository/ImageAnnotator.imjoy.html"
-                    );
-                    if (uri) app.loadPlugin(uri);
+                        const uri = prompt(
+                            `Please type a ImJoy plugin URL`,
+                            "https://github.com/imjoy-team/imjoy-plugins/blob/master/repository/ImageAnnotator.imjoy.html"
+                        );
+                        if (uri) app.loadPlugin(uri);
                     },
                 });
 
-                window.sendToImageJ = async function(){
+                window.sendToImageJ = async function () {
                     const imageURL = document.location.origin
                     const response = await fetch(`${imageURL}/capture.jpeg?_cb=${Date.now()}`);
                     const bytes = await response.arrayBuffer();
                     // if you want a windows displayed in a draggable rezisable grid layout
                     let ij = await api.getWindow("ImageJ.JS")
-                    if(!ij){
+                    if (!ij) {
                         ij = await api.createWindow({
                             src: "https://ij.imjoy.io",
                             name: "ImageJ.JS",
@@ -129,16 +238,16 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
                             // window_id: "imagej-window", // if you want to display imagej in a specific window, place a div with this id in the html
                         });
                     }
-                    else{
+                    else {
                         await ij.show();
                     }
                     // https://github.com/imjoy-team/imagej.js#viewimageimg_array-config
-                    await ij.viewImage(bytes, {name: 'image.jpeg'})
+                    await ij.viewImage(bytes, { name: 'image.jpeg' })
                 }
             });
         </script>
-<script>
-            document.addEventListener('DOMContentLoaded', function() {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
                 function b(B) {
                     let C;
                     switch (B.type) {
@@ -163,8 +272,8 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
                 }
                 var c = document.location.origin;
                 const e = B => {
-                        B.classList.add('hidden')
-                    },
+                    B.classList.add('hidden')
+                },
                     f = B => {
                         B.classList.remove('hidden')
                     },
@@ -183,9 +292,9 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
                     B.onclick = () => {
                         e(B.parentNode)
                     }
-                }), fetch(`${c}/status`).then(function(B) {
+                }), fetch(`${c}/status`).then(function (B) {
                     return B.json()
-                }).then(function(B) {
+                }).then(function (B) {
                     document.querySelectorAll('.default-action').forEach(C => {
                         i(C, B[C.id], !1)
                     })
@@ -199,28 +308,28 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
                         window.stop(), m.innerHTML = 'Start Stream'
                     },
                     q = () => {
-                        j.src = `${c+':81'}/stream.mjpeg`, f(k), m.innerHTML = 'Stop Stream'
+                        j.src = `${c + ':81'}/stream.mjpeg`, f(k), m.innerHTML = 'Stop Stream'
                     },
                     r = document.getElementById('get-stack');
-                    l.onclick = () => {
+                l.onclick = () => {
                     p()
                     j.src = `${c}/capture.jpeg?_cb=${Date.now()}`
                     downloadImage(c)
                     f(k)
                 },
-                o.onclick = () => {
-                    p(), e(k)
-                },
-                m.onclick = () => { //toggle stream
-                    const B = 'Stop Stream' === m.innerHTML;
-                    B ? p() : q()
-                },
-                r.onclick = () => { // stack
-                    getStack()
-                }
+                    o.onclick = () => {
+                        p(), e(k)
+                    },
+                    m.onclick = () => { //toggle stream
+                        const B = 'Stop Stream' === m.innerHTML;
+                        B ? p() : q()
+                    },
+                    r.onclick = () => { // stack
+                        getStack()
+                    }
             });
 
-            async function downloadImage(c){
+            async function downloadImage(c) {
                 // Using fetch
                 const image = await fetch(`${c}/capture.jpeg?_cb=${Date.now()}`)
                 const imageBlog = await image.blob()
@@ -228,25 +337,44 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
 
                 const link = document.createElement('a')
                 link.href = imageURL
-                link.download = "micrograph_"+Date.now()+".jpg"
+                link.download = "micrograph_" + Date.now() + ".jpg"
                 document.body.appendChild(link)
                 link.click()
                 document.body.removeChild(link)
-              };
+            };
 
-            async function getStack(){
-                try{
-                  fetch(document.location.origin+'/getstack');
-                  }
-                catch(e){}
-              };
+            async function getStack() {
+                try {
+                    fetch(document.location.origin + '/getstack');
+                }
+                catch (e) { }
+            };
+
+            const allRanges = document.querySelectorAll(".range-wrap");
+            allRanges.forEach(wrap => {
+                const range = wrap.querySelector(".range");
+                const bubble = wrap.querySelector(".bubble");
+
+                range.addEventListener("input", () => {
+                    setBubble(range, bubble);
+                });
+                setBubble(range, bubble);
+            });
+
+            function setBubble(range, bubble) {
+                const val = range.value;
+                const min = range.min ? range.min : 0;
+                const max = range.max ? range.max : 100;
+                const newVal = Number(((val - min) * 100) / (max - min));
+                bubble.innerHTML = val;
+
+                // Sorta magic numbers based on size of the native UI thumb
+                bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
+            }
         </script>
-</span></p>
+    </span></p>
 </html>
 )rawliteral";
-
-
-
 
 static const char PROGMEM otaindex[] = R"rawliteral(
 <!DOCTYPE HTML>
