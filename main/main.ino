@@ -38,7 +38,8 @@
 #include "WiFiManager.h" // https://github.com/tzapu/WiFiManager
 
 // Local header files (in alphabetical order!)
-#include "Base64.h"
+// #include "base64.h"
+#include <base64.h>
 #include "camera.h"
 // #include "cameraM5Stack.h"
 #include "device_pref.h"
@@ -49,7 +50,7 @@
 */
 
 // declare functions
-void saveCapturedImageGDrive(void);
+void saveCapturedImageGithub(void);
 void setLens(int lensValue);
 void setLED(int ledIntensity);
 void setFrameSize(int val);
@@ -61,10 +62,10 @@ const int focuStackStepsizeAnglerfish = 25; // FIXME: This value should be adjus
 
 // Wifi
 
-const boolean hostWifiAP = true;       // set this variable if you want the ESP32 to be the host
+const boolean hostWifiAP = false;      // set this variable if you want the ESP32 to be the host
 const boolean isCaptivePortal = false; // want to autoconnect to wifi networks?
-const char *mSSID = "BenMur";
-const char *mPASSWORD = "MurBen3128";
+const char *mSSID = "Blynk";
+const char *mPASSWORD = "12345678";
 const char *mSSIDAP = "Matchboxscope";
 const char *hostname = "matchboxscope";
 
@@ -118,7 +119,7 @@ boolean isFirstRun = false;
 boolean isUseSD = true;
 
 // Timelapse
-uint64_t timelapseInterval = -1; 
+uint64_t timelapseInterval = -1;
 static uint64_t t_old = 0;
 int uniqueID = random(100000);
 
@@ -157,30 +158,28 @@ void print_wakeup_reason()
 
   switch (wakeup_reason)
   {
-    case ESP_SLEEP_WAKEUP_EXT0:
-      Serial.println("Wakeup caused by external signal using RTC_IO");
-      break;
-    case ESP_SLEEP_WAKEUP_EXT1:
-      Serial.println("Wakeup caused by external signal using RTC_CNTL");
-      break;
-    case ESP_SLEEP_WAKEUP_TIMER:
-      Serial.println("Wakeup caused by timer");
-      // VSM still not working after automatic reboot - hitting Reset does the job :/
-      ESP.restart(); // FIMXE: Yup, this is weird: Since we connect the awake-Button AND the VCM transistor to Pin12, the pin is still in input mode when the esp is woken up by timer..so we have to get another cause for the wake up=> force restart!
-      break;
-    case ESP_SLEEP_WAKEUP_TOUCHPAD:
-      Serial.println("Wakeup caused by touchpad");
-      break;
-    case ESP_SLEEP_WAKEUP_ULP:
-      Serial.println("Wakeup caused by ULP program");
-      break;
-    default:
-      Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
-      break;
+  case ESP_SLEEP_WAKEUP_EXT0:
+    Serial.println("Wakeup caused by external signal using RTC_IO");
+    break;
+  case ESP_SLEEP_WAKEUP_EXT1:
+    Serial.println("Wakeup caused by external signal using RTC_CNTL");
+    break;
+  case ESP_SLEEP_WAKEUP_TIMER:
+    Serial.println("Wakeup caused by timer");
+    // VSM still not working after automatic reboot - hitting Reset does the job :/
+    ESP.restart(); // FIMXE: Yup, this is weird: Since we connect the awake-Button AND the VCM transistor to Pin12, the pin is still in input mode when the esp is woken up by timer..so we have to get another cause for the wake up=> force restart!
+    break;
+  case ESP_SLEEP_WAKEUP_TOUCHPAD:
+    Serial.println("Wakeup caused by touchpad");
+    break;
+  case ESP_SLEEP_WAKEUP_ULP:
+    Serial.println("Wakeup caused by ULP program");
+    break;
+  default:
+    Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
+    break;
   }
 }
-
-
 
 void callbackTouchpad()
 {
@@ -705,10 +704,10 @@ static esp_err_t cmd_handler(httpd_req_t *req)
   char *buf;
   size_t buf_len;
   char variable[32] = {
-    0,
+      0,
   };
   char value[32] = {
-    0,
+      0,
   };
 
   // adjust parameters
@@ -886,7 +885,7 @@ boolean snapPhoto(String fileName, int ledIntensity, int lensVal)
   // FIXME: this should be triggered by a buttun - or only if wifi and internet are available:
   if (isInternetAvailable)
   {
-    saveCapturedImageGDrive();
+    saveCapturedImageGithub();
   }
 
   // setLED(ledValueOld); // tune LED to old value
@@ -1036,81 +1035,70 @@ void startCameraServer()
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
   httpd_uri_t index_uri = {
-    .uri = "/",
-    .method = HTTP_GET,
-    .handler = index_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/",
+      .method = HTTP_GET,
+      .handler = index_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t indexhtml_uri = {
-    .uri = "/index.html",
-    .method = HTTP_GET,
-    .handler = indexhtml_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/index.html",
+      .method = HTTP_GET,
+      .handler = indexhtml_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t status_uri = {
-    .uri = "/status",
-    .method = HTTP_GET,
-    .handler = status_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/status",
+      .method = HTTP_GET,
+      .handler = status_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t cmd_uri = {
-    .uri = "/control",
-    .method = HTTP_GET,
-    .handler = cmd_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/control",
+      .method = HTTP_GET,
+      .handler = cmd_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t enable_uri = {
-    .uri = "/enable",
-    .method = HTTP_GET,
-    .handler = enable_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/enable",
+      .method = HTTP_GET,
+      .handler = enable_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t capture_uri = {
-    .uri = "/capture.jpeg",
-    .method = HTTP_GET,
-    .handler = capture_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/capture.jpeg",
+      .method = HTTP_GET,
+      .handler = capture_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t stream_uri = {
-    .uri = "/stream.mjpeg",
-    .method = HTTP_GET,
-    .handler = stream_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/stream.mjpeg",
+      .method = HTTP_GET,
+      .handler = stream_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t id_uri = {
-    .uri = "/getid",
-    .method = HTTP_GET,
-    .handler = id_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/getid",
+      .method = HTTP_GET,
+      .handler = id_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t stack_uri = {
-    .uri = "/stack",
-    .method = HTTP_GET,
-    .handler = stack_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/stack",
+      .method = HTTP_GET,
+      .handler = stack_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t restart_uri = {
-    .uri = "/restart",
-    .method = HTTP_GET,
-    .handler = restart_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/restart",
+      .method = HTTP_GET,
+      .handler = restart_handler,
+      .user_ctx = NULL};
 
   httpd_uri_t postjson_uri = {
-    .uri = "/postjson",
-    .method = HTTP_POST,
-    .handler = json_handler,
-    .user_ctx = NULL
-  };
+      .uri = "/postjson",
+      .method = HTTP_POST,
+      .handler = json_handler,
+      .user_ctx = NULL};
 
   Serial.printf("Starting web server on port: '%d'\n", config.server_port);
   if (httpd_start(&camera_httpd, &config) == ESP_OK)
@@ -1142,49 +1130,47 @@ void startOTAServer()
 
   Serial.println("Spinning up OTA server");
   OTAserver.on("/", HTTP_GET, []()
-  {
+               {
     OTAserver.sendHeader("Connection", "close");
-    OTAserver.send(200, "text/html", otaindex);
-  });
+    OTAserver.send(200, "text/html", otaindex); });
   /*handling uploading firmware file */
   OTAserver.on(
-    "/update", HTTP_POST, []()
-  {
+      "/update", HTTP_POST, []()
+      {
     OTAserver.sendHeader("Connection", "close");
     OTAserver.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
-    ESP.restart();
-  },
-  []()
-  {
-    HTTPUpload &upload = OTAserver.upload();
-    if (upload.status == UPLOAD_FILE_START)
-    {
-      Serial.printf("Update: %s\n", upload.filename.c_str());
-      if (!Update.begin(UPDATE_SIZE_UNKNOWN))
-      { // start with max available size
-        Update.printError(Serial);
-      }
-    }
-    else if (upload.status == UPLOAD_FILE_WRITE)
-    {
-      /* flashing firmware to ESP*/
-      if (Update.write(upload.buf, upload.currentSize) != upload.currentSize)
+    ESP.restart(); },
+      []()
       {
-        Update.printError(Serial);
-      }
-    }
-    else if (upload.status == UPLOAD_FILE_END)
-    {
-      if (Update.end(true))
-      { // true to set the size to the current progress
-        Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
-      }
-      else
-      {
-        Update.printError(Serial);
-      }
-    }
-  });
+        HTTPUpload &upload = OTAserver.upload();
+        if (upload.status == UPLOAD_FILE_START)
+        {
+          Serial.printf("Update: %s\n", upload.filename.c_str());
+          if (!Update.begin(UPDATE_SIZE_UNKNOWN))
+          { // start with max available size
+            Update.printError(Serial);
+          }
+        }
+        else if (upload.status == UPLOAD_FILE_WRITE)
+        {
+          /* flashing firmware to ESP*/
+          if (Update.write(upload.buf, upload.currentSize) != upload.currentSize)
+          {
+            Update.printError(Serial);
+          }
+        }
+        else if (upload.status == UPLOAD_FILE_END)
+        {
+          if (Update.end(true))
+          { // true to set the size to the current progress
+            Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+          }
+          else
+          {
+            Update.printError(Serial);
+          }
+        }
+      });
   OTAserver.begin();
   Serial.println("Starting OTA server on port: '82'");
   Serial.println("Visit http://IPADDRESS_SCOPE:82");
@@ -1226,139 +1212,92 @@ void blinkLed(int nTimes)
   delay(150);
 }
 
-// https://github.com/gsampallo/esp32cam-gdrive
 
 void saveCapturedImageGithub()
 {
-  /* Need to package:
-    curl   -X PUT   -H "Accept: application/vnd.github+json"   \
-    -H "Authorization: Bearer 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"  \ // FIXME: we can not store tokens in github :D
-    https://api.github.com/repos/anglerfishbot/AnglerfishGallery/contents/test3   -\
-    d '{"message":"my commit message","committer":{"name":"anglerfishbot","email":"benedictdied@gmail.com"},"content":"bXkgbmV3IGZpbGUgY29udGVudHM="}'
-  */
-}
 
-// https://github.com/zenmanenergy/ESP8266-Arduino-Examples/
-String urlencode(String str)
-{
-  String encodedString = "";
-  char c;
-  char code0;
-  char code1;
-  char code2;
-  for (int i = 0; i < str.length(); i++)
+  // capture image
+  log_d("Capturing image");
+  setLED(255);
+  camera_fb_t *fb = NULL;
+  fb = esp_camera_fb_get();
+  if (!fb)
   {
-    c = str.charAt(i);
-    if (c == ' ')
-    {
-      encodedString += '+';
-    }
-    else if (isalnum(c))
-    {
-      encodedString += c;
-    }
-    else
-    {
-      code1 = (c & 0xf) + '0';
-      if ((c & 0xf) > 9)
-      {
-        code1 = (c & 0xf) - 10 + 'A';
-      }
-      c = (c >> 4) & 0xf;
-      code0 = c + '0';
-      if (c > 9)
-      {
-        code0 = c - 10 + 'A';
-      }
-      code2 = '\0';
-      encodedString += '%';
-      encodedString += code0;
-      encodedString += code1;
-      // encodedString+=code2;
-    }
-    yield();
+    Serial.println("Camera capture failed");
+    delay(1000);
+    ESP.restart();
+    return;
   }
-  return encodedString;
-}
-
-void saveCapturedImageGDrive()
-{
-  Serial.println("Connect to " + String(myDomain));
-  Serial.println("Connect to " + String(myDomain));
-  WiFiClientSecure clientSecure;
-  clientSecure.setInsecure(); // run version 1.0.5 or above
-
-  if (clientSecure.connect(myDomain, 443))
-  {
-    Serial.println("Connection successful");
-
-    setLED(255);
-    camera_fb_t *fb = NULL;
-    fb = esp_camera_fb_get();
-    if (!fb)
-    {
-      Serial.println("Camera capture failed");
-      delay(1000);
-      ESP.restart();
-      return;
-    }
-
-    char *input = (char *)fb->buf;
-    char output[base64_enc_len(3)];
-    String imageFile = "";
-    for (int i = 0; i < fb->len; i++)
-    {
-      base64_encode(output, (input++), 3);
-      if (i % 3 == 0)
-        imageFile += urlencode(String(output));
-    }
-    String Data = myFilename + mimeType + myImage;
-
-    esp_camera_fb_return(fb);
-
-    Serial.println("Send a captured image to Google Drive.");
-
-    clientSecure.println("POST " + myScript + " HTTP/1.1");
-    clientSecure.println("Host: " + String(myDomain));
-    clientSecure.println("Content-Length: " + String(Data.length() + imageFile.length()));
-    clientSecure.println("Content-Type: application/x-www-form-urlencoded");
-    clientSecure.println();
-
-    clientSecure.print(Data);
-    int Index;
-    for (Index = 0; Index < imageFile.length(); Index = Index + 1000)
-    {
-      clientSecure.print(imageFile.substring(Index, Index + 1000));
-    }
-
-    Serial.println("Waiting for response.");
-    long int StartTime = millis();
-    while (!clientSecure.available())
-    {
-      Serial.print(".");
-      delay(100);
-      if ((StartTime + waitingTime) < millis())
-      {
-        Serial.println();
-        Serial.println("No response.");
-        // If you have no response, maybe need a greater value of waitingTime
-        break;
-      }
-    }
-    Serial.println();
-    while (clientSecure.available())
-    {
-      Serial.print(char(clientSecure.read()));
-    }
-  }
-  else
-  {
-    Serial.println("Connection to " + String(myDomain) + " failed.");
-  }
-  clientSecure.stop();
   setLED(0);
+
+  // Encode the image in base64 format
+  log_d("Encode image image");
+  String base64data = base64::encode(fb->buf, fb->len); // convert buffer to base64
+  esp_camera_fb_return(fb);
+  Serial.println(base64data.c_str());
+
+  /* This works in MAC
+  curl -L \
+    -X PUT \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer TOKEN"\
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    https://api.github.com/repos/matchboxscope/matchboxscope-gallery/contents/test2.jpg \
+    -d '{"message":"my commit message","committer":{"name":"Monalisa Octocat","email":"octocat@github.com"},"content":"iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAulBMVEX////gRCL7+/vv7+/q6urgQR3eMADgQBv30cvdJwD98u/fPBXskIDfOhD53dj//fziVDrkWTrhSyn1xbvytKnulYLiTy/gRSXpiHj87Oj++PbpfWfpfWv98e/eNAD76ufnbFTvno7lYknkY0/yr6P308zrhW/75N/tj3vtl4nwp5n0wbjkW0DyrqD0wrnum43ncVvmd2jlaVblcF/siXPrgWnlXj7kVjPcGQDmb17gSS7kXEXvp530vK9oV1uaAAAMbUlEQVR4nO2dDXuiOBeGZXeTIDGgiCCgEalIBbVMa8e+7fj//9bLp1/FtiMZLLt5rmtmbIqBm4RzTk4SptXi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi+s/r77//apKuIfyH+U37ZuKEzRcnbL44YfPFCZsvTvi7shS29VUXY0Ip0CSmFVYXY0IZkMWYaY2VxZoQAtKxmFZZVawJ2wKgC6ZVVhVjQq8tCICsmNZZUX+AUABoM2FaayWx76WJaK/PtNoqYm5pUkIBq9p3sTesCWlGKCASfBOvwZiwXxDGJvWbeA22hHKEhQPi4FuEN0wJJfcAmDyMi+8QpDIljOgxYOw1AoaVXyuGhJJNhFMBoDGr/WqxIzTn54BxP+2KrKq/WswI5RF+Bxi7/s7NfQYjQmUdkdgHEgLO+ql68+CGDaH/oGMB9KazoXHeT51be0UWhNbsDqMYZqq0fAedIcJp9RNUUnVCJXRA+giC7mBqv3sSAbrxOKMqoRW6pDAxgJASa0Pu2VzptapK2G+/9xHnjXjb4K0qoZhZz8SM4uQPBu8QyW2fxMq9dJEggvl0Easzt+9UQlJjA/YdFt3dtBErWxqzg7CAAklRLEsyfVnUhjqNXYe7t6qge1OfWN2WjmdbirsbTc4HEspYDnqUzuXnfRx+027KwB8q/gBDCJb2NJwUJQsYjRU176hoeMtRFJuYZqzZWwLbbbwceBmNNpVaXm5m8Y9bxjXMIm9L3gX38y2kUcaY/HWfIeJHn9FJrhHbLIbyjAVCgsJ25nkpdCezPMlvii3h+GdsQAEc5kMm08H/NsIwsy14kbWiNU0bEd/9a3qptMx8IFB3WUGYET6ZDE/yu2JJaNmFB8SjjElESRSHR/8KW3qSiQJGmBZ5IFoCAXWYneMKsSOUnaNcIvmVlnlT+QcS1JsmFVkRKv2342EUvk/NqSVZc9D4uDSVudJPBr/Izs2nNQRNH1ukkof4ND+DnJxQGQJ820E+E8Lw7l0W0c2dvDVE5Jb+ngmhFLy+S88cCOfEqXyGSqpO6Nv4PIMYEy697LfSCN44J1yZUOyVpaL2hJNHt/I1VlPlTJRQmmvb91L5zat+kZVUkVDulc3HxIROTtifNjurP3EvZEtRlHsL8ZbDilSVCKU5LQc8ePzxrZuwGmHw3ojmwvNbDphOVIVQfrtM2PkW6zASVSGcXgQUSHCSQJS81SZynOh5KtaeWKxAaI4uE+LDEgXL1GyBQkoSQboN/HofzQqEcnSRkDwWsajkdXRKjg7EMWOtM4p/ghBjO1+CYXkLlZ57TExGXo19lX0vxWQ5y12Ft1iSsmOIW+MilEqWpmzGlyyDfI7GX7yVxOTZXVjWF8tVITSdM4ePKHS1SWZIpJV7iS+5Eb3a+mklj29GkIBs7AuSWWB1I+Z2Ugndk/4JUDJDTA4zxLC2gf+1hEqQJtB2dteILx8Yr649LfBaVt85si8AI6N7Z8+HG9vpCjkkUOsa+V9NOMgeJUVez4JgtfMOHmAs2vQQkCOsPi5COYZXLMuUZyM9a1tc156Fqwm1dlRmLRQ/HKEDHyDdTmi2xrK4Cxad+8VsHU4dNSW/q8nxX/0cihA763NzEUdnkXCUlcJoKFpSfzZ01fQ5JAT1RnYvOQDoNWU3rib0iIC7neNmNMWYBBwtNwHUCcdeMNLx0SIUhA01+21NmfCrCWUdxDaku9FEf2L64m46TMwIOsoqYjwdy4MlKFlik6LW9CBeTThJV5MAjIVX/VWNcc4XCyFdFG3jsk9EnXpc4tWE0qKwJwCAklYCPwc9eJ4oPiEc1mNqrvf44ScL2lRcnqRqTBt+NML/kr79c9iyHj5blfixQE0rpSrEpf3eB0/Z5zJq2qlQgVAafvygneks9gbdmgZQVcYWofrVRkQEQvTTeX6OfhKY3Rf0yA7iQ1UaPS2+0ojxwAn1nlde7hvMVbY5qrZ500qE4+hTY4OIepfE3keSOmnT1zXpVm3eQu5+iBhHPG/D3bvM2niOBeTWlVOsOPckLi931HgQFQVeGUioCrC2/d6V5w975ZEZwEQYhn552CIuyba2tHDlOWBv/m6zU5L2JW4gX5y6EJc1Tn1Xn8e3QofC41EhhnB7L44/iDpD8lBfZp/JahNv00MkF1LdwWcpbXlV4549RmuiLG83vd9s7gcr79tMHObi7xhqvjhh88UJmy9O2HxxwuaLEzZfnDCTojCbYyiv6cIJWJz2hNAyx3vtB0HKRF5rM02UD2PasWnuR7CKdPRDWhB/+ajAin8svij54m6mrWXz9MLHvqiVFct9bbbzJhUHyyeEsmPvFeWnM2cOoBBCqo7WxblWtr2fdJgMbOdkHfC4Y9tHCfuZbReTTF6nR+KqKHBmR/k3pT/X0xMIzu5oYGz1R0ZSTJbTasuMTwjFl/gK2ple8oU/Q0ooAQaI/1GDHHFnQKM4bQhh93TEPoLU3t9384m2861r/WVcBzaEuD46OnSRnR7/jNJictjkZmk6IUQwECUwqrTS75SwLfScXMvsxgcEgNFO9MSZQxDI80dShIq5sbFDyOy0d8kILPfr1sQlwhmNpGLcfViL4m4OENwUB/g6Jm4giqJmI9SeFcVeNy7WRHHdiSGHDAnxUJ7kyor+h4WBlBAo/hwTJ2+tFS42NokU6Odrf+4w/lV8ngFiZ5+CNnL7Sdsq40AA7aIRpxA7aVJVMYcAdfObZf2i2E3Xx1mBil6rrC46JzxbvSy/oW5RIqoAFv3FQEJ6u5Upgb/ODd4O4qfiwAWlecNvEXjIj5QjtM8I63i/2rbfRWre+JJNioSj6aBKyzY+IYxP2i0+yz0Ai5upQfIjaQVpi7fvZsksDEh+1eIWq3mpANQCRRpiMsg/w8PCGvMOFRuITReTol4b4Srd9EpCC4H01u/auCT1uSE4e8eXMiOwuP/GgdA6IqTHhLiYNjVdQnNCJX4+q2yzvZKwNaDphgMBl72pdALRMj3StzEpKvwK4VEbInJjQp8kz0wI8agkd2/ZhGjJMyca9L5o4s8JrfUuLLae9ne73BbdilBZULKwIvwaltW6JiQyEzsIwd5vfE5YrlsRtjwB6SsdR6Uxlf8TJYdOdHyId74N4Wl8cplwvMFAFcCgVSYroCSO1XaQLPZ37FrC1q3aMPb1giAYF65OFJBqKg6C633R9W0IWBKC5fM80XOxffAyoTkkAnIuVCstYo/tE+wcvvCbhIocRD97idRqL2U4j0txFnm/5AbiA8KWRoX27lK9oUqiFTxEb58QKn0xUxELSSsD5kJsCXU3VbEf4gPCyYgI8OK6Jj8OzntoedQ8HxJK7XQ5EQH5LVN2GJPlKNWWKSEaiXIiT/qUMFmbCHoXZ7IXWAAnzvJDwvELpTQevBiFx3cwmYsTM9YkYvocft3SjOcYIMEodYdpXV1wutD5Q0JLC3fhrLuPaSZtoB/i0tsQygh1HQFdXtk0wqcvxPjY0iSJmqOozWujYtx7s5jmHtLA0/HlPQXTuJMe//xbcWm/jewbR22TF6CLrWd8+YXWTSd8JmQ4bnkQ/7i0MqHhhCYGRhKuuES/5BJZEd7I0kxp5glEeHHX9hcJy8f4R4TWU62ExfDtFWWXa7lYv7DW95xQAGqRSZNO2lAtYlff3ROKB0Jv+Uf9ofyG9CKQ6gtCkYkKUJ5rUwJCF+Xm9Jxwi9A+ExWH5AXtFuMiG9nfotf8dskvwM3upjnCTGOad33uiYB5RjBxEYmy35oOwnkb+PB9NjHTOaEWW98sPpA6SHgpEnSrdpFgm9gIvOalEwLILiskCP9RQg0jom5W2sqOgyqUs2gq6uYNN7YJKX99yTlhq4cxdae71b1OweEt35OkOAq01cYgoF2ESNZDfIy90gYqpZ5D2BG+0HNCZQAwge1kAgF38/87xvpB4X47iEgpKnUYD4TaJwXyHcbJWKFNsHG0I0h8y4ohIcZhk4kfxaXxaelroPTbzLKJ/rATnreHoo1cXTXU7mOneOOD/NDp7KHMoDMsnTrpLzpnIw9/+rTUBVV3hyf/zY78EHVVw4iLjx2P//AYn7ZrxxdkDS4O0r6g0/nD0vm6sddfh2tRPkyonc72XZz7e18+Efvhuu+d9xNfXIdh/2zFreL348LJxcv6qvgccPPFCZsvTth8ccLmixM2X5yw+eKEzRcnbL44YfPFCZuv/wThXw3SFYRXfYmLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi6vJ+j8CXRUnlwc4sgAAAABJRU5ErkJggg=="}'
+    */
+
+  const char *token = "TOKEN";
+  const char *owner = "matchboxscope";
+  const char *repo = "matchboxscope-gallery";
+  const char *message = "Uploading image from ESP32";
+  const char *committer_name = "matchboxscope-bot";
+  const char *committer_email = "matchboxscope@gmail.com";
+  const char *text_mime_type = "text/plain"; // Set the correct MIME type for your text
+  //const char *text_base64_data = "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";
+
+  // Construct the JSON payload
+  DynamicJsonDocument doc(2048);
+  JsonObject payload = doc.to<JsonObject>();
+  payload["message"] = message;
+  JsonObject committer = payload.createNestedObject("committer");
+  committer["name"] = committer_name;
+  committer["email"] = committer_email;
+  payload["content"] = base64data.c_str(); // text_base64_data;
+  payload["content_type"] = text_mime_type;
+
+  // Serialize the JSON payload to a string
+  String payload_string;
+  serializeJson(payload, payload_string);
+
+  // Construct the URL
+  //String url = "https://api.github.com/repos/matchboxscope/matchboxscope-gallery/contents/image12357.jpg"; // +  //
+  String url = "https://api.github.com/repos/" + String(owner) + "/" + String(repo) + "/contents/image_" + String(random()) + ".jpg";
+  Serial.println(url.c_str());
+  
+  // Send the request
+  HTTPClient http;
+  http.begin(url);
+  http.addHeader("Accept", "application/vnd.github+json");
+  http.addHeader("Authorization", "Bearer " + String(token));
+  http.addHeader("X-GitHub-Api-Version", "2022-11-28");
+  http.addHeader("Content-Type", "application/json");
+  int http_code = http.sendRequest("PUT", payload_string);
+
+  // Print the response
+  Serial.println(payload);
+  Serial.println(payload_string);
+  Serial.println(http.getString());
+
+  payload.clear();
+  http.end();
 }
 
+
+/*
+
+WIFI STUFF
+
+*/
 void initWifiAP(const char *ssid)
 {
   Serial.print("Network SSID (AP): ");
@@ -1564,7 +1503,8 @@ void setup()
     */
 
     // Sleep
-    if (timelapseInterval==-1) timelapseInterval = 60; // do timelapse every minute if not set properly
+    if (timelapseInterval == -1)
+      timelapseInterval = 60; // do timelapse every minute if not set properly
     Serial.print("Sleeping for ");
     Serial.print(timelapseInterval);
     Serial.println(" s");
@@ -1655,18 +1595,7 @@ void setup()
   // initiliaze timer
   t_old = millis();
 
-  // FIXME: This is just a tet to see if this works in general - the standalone application works; My guess: An issue with the image dimensions
-  isInternetAvailable = Ping.ping("www.google.com", 3);
-  if (!isInternetAvailable or hostWifiAP)
-  {
-    Serial.println("Ping failed -> we are not connected to the internet most likely!");
-  }
-  else
-  {
-    Serial.println("Ping succesful -> we are connected to the internet most likely!.");
-    // Save image in Google Drive
-    saveCapturedImageGDrive();
-  }
+  saveCapturedImageGithub();
 }
 
 void loop()
